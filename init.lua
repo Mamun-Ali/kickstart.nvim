@@ -405,18 +405,35 @@ require('lazy').setup({
       -- Telescope picker. This is really useful to discover what Telescope can
       -- do as well as how to actually do it!
 
+      local telesctopeConfig = require 'telescope.config'
+      local actions = require 'telescope.actions'
+
+      --clone default telescope configurations
+      local vimgrep_arguments = { unpack(telesctopeConfig.values.vimgrep_arguments) }
+
+      -- serach hidden/dot files
+      table.insert(vimgrep_arguments, '--hidden')
+
+      -- ignore .git directory
+      table.insert(vimgrep_arguments, '--glob')
+      table.insert(vimgrep_arguments, '!**/.git/*')
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        -- pickers = {}
+        defaults = {
+          vimgrep_arguments = vimgrep_arguments,
+          mappings = {
+            i = { ['<c-enter>'] = 'to_fuzzy_refine', ['<c-d>'] = actions.delete_buffer + actions.move_to_top },
+          },
+        },
+        pickers = {
+          find_files = {
+            find_command = { 'rg', '--files', '--hidden', '--glob', '!**/.git/*' },
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
